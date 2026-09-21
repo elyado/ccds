@@ -1,0 +1,59 @@
+<?php
+
+namespace App\Filament\Admin\Resources\Events;
+
+use App\Filament\Admin\Resources\Events\Pages\CreateEvent;
+use App\Filament\Admin\Resources\Events\Pages\EditEvent;
+use App\Filament\Admin\Resources\Events\Pages\ListEvents;
+use App\Filament\Admin\Resources\Events\Schemas\EventForm;
+use App\Filament\Admin\Resources\Events\Tables\EventsTable;
+use App\Filament\Admin\Resources\Events\RelationManagers\ParticipantsRelationManager;
+use App\Models\Event;
+use BackedEnum;
+use Filament\Resources\Resource;
+use Filament\Schemas\Schema;
+use Filament\Tables\Table;
+use UnitEnum;
+
+class EventResource extends Resource
+{
+    protected static ?string $model = Event::class;
+
+    protected static ?string $recordTitleAttribute = 'title';
+
+    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-calendar-days';
+
+    protected static ?string $navigationLabel = 'Eventos';
+
+    protected static ?string $modelLabel = 'evento';
+
+    protected static ?string $pluralModelLabel = 'eventos';
+
+    protected static string|UnitEnum|null $navigationGroup = 'Cartelera';
+
+    protected static ?int $navigationSort = 2;
+
+    public static function form(Schema $schema): Schema
+    {
+        return EventForm::configure($schema);
+    }
+
+    public static function table(Table $table): Table
+    {
+        return EventsTable::configure($table);
+    }
+public static function getRelations(): array
+{
+    return [
+        ParticipantsRelationManager::class,
+    ];
+}
+    public static function getPages(): array
+    {
+        return [
+            'index' => ListEvents::route('/'),
+            'create' => CreateEvent::route('/create'),
+            'edit' => EditEvent::route('/{record}/edit'),
+        ];
+    }
+}
