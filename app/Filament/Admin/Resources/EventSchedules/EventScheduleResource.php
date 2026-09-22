@@ -7,6 +7,7 @@ use App\Filament\Admin\Resources\EventSchedules\Pages\EditEventSchedule;
 use App\Filament\Admin\Resources\EventSchedules\Pages\ListEventSchedules;
 use App\Filament\Admin\Resources\EventSchedules\Schemas\EventScheduleForm;
 use App\Filament\Admin\Resources\EventSchedules\Tables\EventSchedulesTable;
+use App\Filament\Admin\Resources\EventSchedules\RelationManagers\ReservationsRelationManager;
 use App\Models\EventSchedule;
 use BackedEnum;
 use Filament\Resources\Resource;
@@ -40,6 +41,12 @@ class EventScheduleResource extends Resource
         return EventSchedulesTable::configure($table);
     }
 
+    public static function getRelations(): array
+{
+    return [
+        ReservationsRelationManager::class,
+    ];
+}
     public static function getPages(): array
     {
         return [

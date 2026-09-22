@@ -102,4 +102,8 @@ class EventSchedule extends Model
     {
         return $this->belongsTo(User::class, 'capacity_override_by');
     }
+    public function reservations(): HasMany
+{
+    return $this->hasMany(Reservation::class);
+}
 }

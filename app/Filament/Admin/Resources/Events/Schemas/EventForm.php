@@ -24,11 +24,11 @@ class EventForm
                         ->columnSpanFull(),
 
                     TextInput::make('slug')
-                        ->label('Slug URL')
-                        ->required()
-                        ->maxLength(220)
-                        ->unique(ignoreRecord: true)
-                        ->helperText('Ejemplo: noches-acusticas-en-el-soler'),
+                        ->label('URL generada automáticamente')
+                        ->disabled()
+                        ->dehydrated(false)
+                        ->visibleOn('edit')
+                        ->helperText('Se crea a partir del título y no se repite.'),
 
                     Select::make('category_id')
                         ->label('Categoría')

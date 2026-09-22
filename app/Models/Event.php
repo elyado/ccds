@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Str;
 
 class Event extends Model
 {
@@ -64,6 +65,35 @@ class Event extends Model
         'finished_at' => 'datetime',
         'status' => ContentStatus::class,
     ];
+
+protected static function booted(): void
+{
+    static::saving(function (Event $event): void {
+        if (! $event->isDirty('title') && filled($event->slug)) {
+            return;
+        }
+
+        $baseSlug = Str::slug($event->title) ?: 'evento';
+        $slug = $baseSlug;
+        $suffix = 2;
+
+        while (
+            static::withTrashed()
+                ->where('slug', $slug)
+                ->when(
+                    $event->exists,
+                    fn ($query) => $query->whereKeyNot($event->getKey())
+                )
+                ->exists()
+        ) {
+            $slug = "{$baseSlug}-{$suffix}";
+            $suffix++;
+        }
+
+        $event->slug = $slug;
+    });
+}
+
     public function series(): BelongsTo
     {
         return $this->belongsTo(EventSeries::class, 'event_series_id');
