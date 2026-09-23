@@ -3,12 +3,16 @@
 namespace App\Filament\Admin\Resources\Events\Schemas;
 
 use Filament\Forms\Components\DateTimePicker;
+use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
+use Illuminate\Support\Str;
+use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
+use App\Models\Media;
 
 class EventForm
 {
@@ -68,6 +72,16 @@ class EventForm
                         ->columnSpanFull(),
                 ])
                 ->columns(3),
+
+            Section::make('Imágenes del evento')
+                ->description('Se guardan en storage/app/public/events. Ejecuta php artisan storage:link una sola vez.')
+                ->schema([
+                    self::mediaUpload('poster_media_id', 'Cartel vertical', 'poster', 'Ideal para la cartelera. Proporción recomendada: 4:5.'),
+                    self::mediaUpload('cover_media_id', 'Portada horizontal', 'cover', 'Se muestra en el hero. Proporción recomendada: 16:9.'),
+                    self::mediaUpload('mobile_media_id', 'Portada móvil', 'mobile', 'Versión vertical para teléfonos. Proporción recomendada: 4:5.'),
+                    self::mediaUpload('seo_image_media_id', 'Imagen para compartir', 'seo', 'Se usará en SEO y redes sociales. Proporción recomendada: 1.91:1.'),
+                ])
+                ->columns(2),
 
             Section::make('Datos para asistentes')
                 ->schema([
@@ -200,5 +214,62 @@ class EventForm
                 ])
                 ->columns(2),
         ]);
+    }
+
+    private static function mediaUpload(string $field, string $label, string $collection, string $helperText): FileUpload
+    {
+        return FileUpload::make($field)
+            ->label($label)
+            ->image()
+            ->imageEditor()
+            ->disk('public')
+            ->directory("events/{$collection}")
+            ->visibility('public')
+            ->maxSize(8192)
+            ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
+            ->helperText($helperText . ' JPG, PNG o WebP; máximo 8 MB.')
+            ->formatStateUsing(function ($state): ?string {
+                if (blank($state)) {
+                    return null;
+                }
+
+                return is_numeric($state) ? Media::find($state)?->file_name : $state;
+            })
+            ->saveUploadedFileUsing(function (TemporaryUploadedFile $file) use ($collection): string {
+                $path = $file->storePublicly("events/{$collection}", 'public');
+                [$width, $height] = @getimagesize($file->getRealPath()) ?: [null, null];
+
+                Media::create([
+                    'uuid' => (string) Str::uuid(),
+                    'collection_name' => "event_{$collection}",
+                    'name' => pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME),
+                    'file_name' => $path,
+                    'disk' => 'public',
+                    'mime_type' => $file->getMimeType(),
+                    'extension' => $file->getClientOriginalExtension(),
+                    'size' => $file->getSize(),
+                    'width' => $width,
+                    'height' => $height,
+                    'alt_text' => pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME),
+                    'visibility' => 'public',
+                    'uploaded_by' => auth()->id(),
+                ]);
+
+                return $path;
+            })
+            ->dehydrateStateUsing(function ($state) {
+                if (blank($state)) {
+                    return null;
+                }
+
+                if (is_numeric($state)) {
+                    return (int) $state;
+                }
+
+                return Media::query()
+                    ->where('disk', 'public')
+                    ->where('file_name', $state)
+                    ->value('id');
+            });
     }
 }

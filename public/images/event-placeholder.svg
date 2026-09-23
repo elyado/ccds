@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" role="img" aria-labelledby="title description">
+  <title id="title">Centro Cultural Domingo Soler</title>
+  <desc id="description">Imagen temporal para los eventos del Centro Cultural Domingo Soler.</desc>
+  <defs>
+    <linearGradient id="background" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#090909"/>
+      <stop offset="0.65" stop-color="#3b1012"/>
+      <stop offset="1" stop-color="#b3161b"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="800" fill="url(#background)"/>
+  <g fill="none" stroke="#fff" stroke-width="9" opacity=".18">
+    <rect x="150" y="120" width="470" height="300"/>
+    <rect x="230" y="70" width="470" height="300"/>
+  </g>
+  <text x="600" y="565" fill="#fff" font-family="Georgia, serif" font-size="62" text-anchor="middle">Centro Cultural</text>
+  <text x="600" y="650" fill="#fff" font-family="Georgia, serif" font-size="104" text-anchor="middle">Domingo Soler</text>
+</svg>
